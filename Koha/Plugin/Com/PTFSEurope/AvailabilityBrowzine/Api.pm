@@ -43,7 +43,7 @@ sub search {
     # Get the DOI
     my $doi = $metadata->{doi};
     # Get the PMID
-    my $pmid = $metadata->{pmid};
+    my $pmid = $metadata->{pmid} || $metadata->{pubmedid};
 
     my $using = {};
     if ($pmid && length $pmid > 0) {
