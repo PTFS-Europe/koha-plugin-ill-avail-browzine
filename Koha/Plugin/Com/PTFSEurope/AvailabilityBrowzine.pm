@@ -59,7 +59,7 @@ sub ill_availability_services {
     my ($self, $params) = @_;
 
     # A list of metadata properties we're interested in
-    my $properties = [ 'doi', 'pmid' ];
+    my $properties = [ 'doi', 'pmid', 'pubmedid' ];
 
     # Establish if we can service this item
     my $can_service_metadata = 0;

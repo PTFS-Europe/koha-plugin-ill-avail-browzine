@@ -34,8 +34,7 @@ sub search {
 
     my $base = $c->req->url->base;
 
-    my $base_url = "http://localhost:8081/api/v1/contrib/browzine/search";
-    #my $base_url = lc $base->scheme . "://" . $base->host . ":" . $base->port . "/api/v1/contrib/browzine/search";
+    my $base_url = lc $base->scheme . "://" . $base->host . "/api/v1/contrib/browzine/search";
 
     # Gather together what we've been passed
     my $metadata = $c->validation->param('metadata') || '';
@@ -44,7 +43,7 @@ sub search {
     # Get the DOI
     my $doi = $metadata->{doi};
     # Get the PMID
-    my $pmid = $metadata->{pmid};
+    my $pmid = $metadata->{pmid} || $metadata->{pubmedid};
 
     my $using = {};
     if ($pmid && length $pmid > 0) {
