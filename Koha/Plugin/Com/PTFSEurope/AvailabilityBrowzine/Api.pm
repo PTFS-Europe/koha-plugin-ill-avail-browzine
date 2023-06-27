@@ -34,6 +34,8 @@ sub search {
 
     my $base = $c->req->url->base;
 
+    # FIXME: Use base_url below for local DEV
+    # my $base_url = "http://localhost:8081/api/v1/contrib/browzine/search";
     my $base_url = lc $base->scheme . "://" . $base->host . "/api/v1/contrib/browzine/search";
 
     # Gather together what we've been passed
@@ -65,7 +67,7 @@ sub search {
         my $to_send = [];
         # Parse the BrowZine response and prepare our response
         my $res = decode_json($response->decoded_content);
-        if ($res->{results}->{result}->{data}) {
+        if ($res->{results}->{result}->{data} && $res->{results}->{result}->{data}->{availableThroughBrowzine}) {
             my $data = $res->{results}->{result}->{data};
             push @{$to_send}, {
                 title  => $data->{title},
