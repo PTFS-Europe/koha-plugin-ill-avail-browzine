@@ -1,6 +1,6 @@
 package Koha::Plugin::Com::PTFSEurope::AvailabilityBrowzine::Api;
 
- # This file is part of Koha.
+# This file is part of Koha.
 #
 # Koha is free software; you can redistribute it and/or modify it under the
 # terms of the GNU General Public License as published by the Free Software
@@ -17,9 +17,9 @@ package Koha::Plugin::Com::PTFSEurope::AvailabilityBrowzine::Api;
 
 use Modern::Perl;
 
-use JSON qw( decode_json );
+use JSON         qw( decode_json );
 use MIME::Base64 qw( decode_base64 );
-use URI::Escape qw ( uri_unescape );
+use URI::Escape  qw ( uri_unescape );
 use LWP::UserAgent;
 use HTTP::Request::Common;
 
@@ -40,34 +40,36 @@ sub search {
 
     # Gather together what we've been passed
     my $metadata = $c->validation->param('metadata') || '';
-    $metadata = decode_json(decode_base64(uri_unescape($metadata)));
+    $metadata = decode_json( decode_base64( uri_unescape($metadata) ) );
 
     # Get the DOI
     my $doi = $metadata->{doi};
+
     # Get the PMID
     my $pmid = $metadata->{pmid} || $metadata->{pubmedid};
 
     my $using = {};
-    if ($pmid && length $pmid > 0) {
+    if ( $pmid && length $pmid > 0 ) {
         $using->{identifier} = 'pmid';
-        $using->{value} = $pmid;
-    } elsif ($doi && length $doi > 0) {
+        $using->{value}      = $pmid;
+    } elsif ( $doi && length $doi > 0 ) {
         $using->{identifier} = 'doi';
-        $using->{value} = $doi;
+        $using->{value}      = $doi;
     }
 
-    if (scalar keys %{$using} == 0) {
-        _return_response({ error => 'Must supply either DOI or PMID' }, $c);
+    if ( scalar keys %{$using} == 0 ) {
+        _return_response( { error => 'Must supply either DOI or PMID' }, $c );
     }
 
-    my $ua = LWP::UserAgent->new;
+    my $ua       = LWP::UserAgent->new;
     my $response = $ua->get("${base_url}?$using->{identifier}=$using->{value}");
 
     if ( $response->is_success ) {
         my $to_send = [];
+
         # Parse the BrowZine response and prepare our response
-        my $res = decode_json($response->decoded_content);
-        if ($res->{results}->{result}->{data} && $res->{results}->{result}->{data}->{availableThroughBrowzine}) {
+        my $res = decode_json( $response->decoded_content );
+        if ( $res->{results}->{result}->{data} && $res->{results}->{result}->{data}->{availableThroughBrowzine} ) {
             my $data = $res->{results}->{result}->{data};
             push @{$to_send}, {
                 title  => $data->{title},
@@ -80,19 +82,19 @@ sub search {
             $to_send = [];
         }
 
-        _return_response({ success => $to_send }, $c);
+        _return_response( { success => $to_send }, $c );
     } else {
-        _return_response({ error => $response->status_line }, $c);
+        _return_response( { error => $response->status_line }, $c );
     }
 }
 
 sub _determine_url {
-    my ( $data ) = @_;
-    if ($data->{fullTextFile} && length $data->{fullTextFile} > 0) {
+    my ($data) = @_;
+    if ( $data->{fullTextFile} && length $data->{fullTextFile} > 0 ) {
         return $data->{fullTextFile};
-    } elsif ($data->{contentLocation} && length $data->{contentLocation} > 0) {
+    } elsif ( $data->{contentLocation} && length $data->{contentLocation} > 0 ) {
         return $data->{contentLocation};
-    } elsif ($data->{ILLURL} && length $data->{ILLURL} > 0) {
+    } elsif ( $data->{ILLURL} && length $data->{ILLURL} > 0 ) {
         return $data->{ILLURL};
     }
     return '';
@@ -101,11 +103,11 @@ sub _determine_url {
 sub _return_response {
     my ( $response, $c ) = @_;
     return $c->render(
-        status => $response->{errorcode} || 200,
+        status  => $response->{errorcode} || 200,
         openapi => {
             results => {
                 search_results => $response->{success} || [],
-                errors => $response->{error} || []
+                errors         => $response->{error}   || []
             }
         }
     );
