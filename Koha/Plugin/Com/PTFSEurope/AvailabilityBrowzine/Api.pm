@@ -69,7 +69,13 @@ sub search {
 
         # Parse the BrowZine response and prepare our response
         my $res = decode_json( $response->decoded_content );
-        if ( $res->{results}->{result}->{data} && $res->{results}->{result}->{data}->{availableThroughBrowzine} ) {
+        if (
+            $res->{results}->{result}->{data} &&
+            (
+                $res->{results}->{result}->{data}->{availableThroughBrowzine} ||
+                $res->{results}->{result}->{data}->{openAccess} )
+            )
+        {
             my $data = $res->{results}->{result}->{data};
             push @{$to_send}, {
                 title  => $data->{title},
