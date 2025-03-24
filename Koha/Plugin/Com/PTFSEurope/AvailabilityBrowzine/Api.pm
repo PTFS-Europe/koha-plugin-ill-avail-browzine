@@ -17,6 +17,7 @@ package Koha::Plugin::Com::PTFSEurope::AvailabilityBrowzine::Api;
 
 use Modern::Perl;
 
+use Koha;
 use JSON         qw( decode_json );
 use MIME::Base64 qw( decode_base64 );
 use URI::Escape  qw ( uri_unescape );
@@ -62,6 +63,7 @@ sub search {
     }
 
     my $ua       = LWP::UserAgent->new;
+    $ua->agent( 'Koha/' . Koha::version() );
     my $response = $ua->get("${base_url}?$using->{identifier}=$using->{value}");
 
     if ( $response->is_success ) {
